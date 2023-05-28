@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <title>Document</title>
+</head>
+
+<body>
+    <video id="video" controls preload="none" playsinline></video>
+    <script>
+        var video = document.getElementById('video');
+
+        video.addEventListener('waiting', (event) => {
+            console.log('wating : ', event);
+        })
+
+        video.addEventListener('loadstart', (event) => {
+            console.log('loadstart : ', event);
+        })
+        video.addEventListener('error', (event) => {
+            console.log('error : ', event);
+        })
+
+        video.addEventListener('loadeddata', (event) => {
+            console.log('loadeddata : ', event);
+        })
+
+        video.addEventListener('ended', (event) => {
+            console.log('ended : ', event);
+        })
+
+        video.addEventListener("abort", (event) => {
+            console.log('aborted : ', event);
+        });
+
+        video.addEventListener("timeupdate", (event) => {
+            console.log('timeupdate : ', event);
+        });
+
+        video.addEventListener("progress", (event) => {
+            console.log('progress : ', event);
+
+        });
+
+        video.addEventListener("canplay", (event) => {
+            console.log("canplay : ", event);
+        });
+
+        video.addEventListener("durationchange", (event) => {
+            console.log("durationchange : ", event);
+
+        });
+
+        video.addEventListener("emptied", (event) => {
+            console.log("emptied : ", event);
+
+        });
+
+        video.addEventListener("stalled", (event) => {
+            console.log("stalled : ", event);
+        });
+
+        video.addEventListener('loadedmetadata', (event) => {
+            console.log("loadedmetadata : ", event);
+            video.play();
+
+        })
+
+        video.addEventListener("suspend", (event) => {
+            console.log("suspend : ", event);
+        });
+
+
+
+        var videoSrc = 'https://www.aplayz.co.kr/broadcast/77775cd12e949758af02f1aac0cb0a69.m3u8'; // <- 테스트 URL 이므로 본인의 URL 작성
+
+        //
+        // 우선 HLS를 지원하는지 체크
+        //
+        if (Hls.isSupported()) {
+            var hls = new Hls();
+            hls.loadSource(videoSrc);
+            hls.attachMedia(video);
+
+            hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+                video.muted = true;
+                video.play();
+            });
+        }
+        else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = videoSrc;
+            video.load();
+
+            setTimeout(() => {
+                video.load();
+            }, 5000)
+        } 
+    </script>
+</body>
+
+</html>
