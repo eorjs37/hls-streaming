@@ -83,7 +83,9 @@
         // 우선 HLS를 지원하는지 체크
         //
         if (Hls.isSupported()) {
-            var hls = new Hls();
+            var hls = new Hls({
+                autoStartLoad: true
+            });
             hls.loadSource(videoSrc);
             hls.attachMedia(video);
 
@@ -91,6 +93,29 @@
                 video.muted = false;
                 video.play();
             });
+
+            hls.on(Hls.Events.ERROR, () => {
+                console.error("error : ", data.fatal);
+                if (data.fatal) {
+                    switch (data.type) {
+                        case Hls.ErrorTypes.MEDIA_ERROR:
+                            console.log('fatal media error encountered, try to recover');
+                            hls.recoverMediaError();
+                            break;
+                        case Hls.ErrorTypes.NETWORK_ERROR:
+                            console.error('fatal network error encountered', data);
+                            // All retries and media options have been exhausted.
+                            // Immediately trying to restart loading could cause loop loading.
+                            // Consider modifying loading policies to best fit your asset and network
+                            // conditions (manifestLoadPolicy, playlistLoadPolicy, fragLoadPolicy).
+                            break;
+                        default:
+                            // cannot recover
+                            hls.destroy();
+                            break;
+                    }
+                }
+            })
         }
         else if (video.canPlayType('application/vnd.apple.mpegurl')) {
             video.src = videoSrc;
