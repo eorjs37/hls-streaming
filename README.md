@@ -5,3 +5,4 @@
 
 
 ## Media Session API
+> Media Session을 통해 잠금화면시 현재 재생되고 있는 오디오/비디오의 정보 및 컨트롤이 가능하다.
