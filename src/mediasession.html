@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>MediaSession</title>
+</head>
+
+<body>
+
+	<script>
+		// navigator.mediaSession 메타데이터 세ㅇ
+		if ("mediaSession" in navigator) {
+			navigator.mediaSession.metadata = new MediaMetadata({
+				title: "Podcast Episode Title",
+				artist: "Podcast Host",
+				album: "Podcast Name",
+			});
+		}
+	</script>
+</body>
+
+</html>
