@@ -12,7 +12,7 @@
 </head>
 
 <body>
-	<video id="video" controls preload="none" playsinline width="400" height="400"></video>
+	<video id="video" controls preload="none" playsinline width="400" height="400" muted="muted" autoplay></video>
 	<script>
 		var video = document.getElementById('video');
 
@@ -68,7 +68,6 @@
 
 		video.addEventListener('loadedmetadata', (event) => {
 			console.log("loadedmetadata : ", event);
-			video.play();
 
 		})
 
@@ -80,7 +79,7 @@
 
 
 		//https://www.aplayz.co.kr/broadcast/8ab9c835e271acacd4a0ad5620239693.m3u8
-		var videoSrc = 'https://www.aplayz.co.kr/broadcast/8ab9c835e271acacd4a0ad5620239693.m3u8'; // <- 테스트 URL 이므로 본인의 URL 작성
+		var videoSrc = 'https://www.aplayz.co.kr/broadcast/fa137f61bcdde5bc913338005dd6e7a9.m3u8'; // <- 테스트 URL 이므로 본인의 URL 작성
 
 		//
 		// 우선 HLS를 지원하는지 체크
@@ -93,8 +92,10 @@
 			hls.attachMedia(video);
 
 			hls.on(Hls.Events.MEDIA_ATTACHED, function () {
-				video.muted = false;
-				hls.startLoad()
+
+				hls.startLoad();
+
+				video.muted = true;
 				video.play();
 			});
 
@@ -136,11 +137,7 @@
 		}
 		else if (video.canPlayType('application/vnd.apple.mpegurl')) {
 			video.src = videoSrc;
-			video.load();
 
-			setTimeout(() => {
-				video.load();
-			}, 5000)
 		} 
 	</script>
 </body>
