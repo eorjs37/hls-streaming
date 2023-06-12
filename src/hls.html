@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+	<script src="https://vjs.zencdn.net/8.3.0/video.min.js"></script>
+	<title>Hls</title>
+	<style>
+		video {
+			max-width: 500px;
+			width: 100%;
+			max-height: 500px;
+			height: 100%;
+			object-fit: fill;
+		}
+	</style>
+</head>
+
+<body>
+	<video id="video" controls autoplay muted playsinline></video>
+
+	<script>
+		let video = null;
+		let videoSrc = 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8'
+		let hls = null;
+		/* setVideo */
+		const initVideo = () => {
+			video = document.querySelector('#video')
+		}
+
+		/* playVideo */
+		const playVideo = () => {
+			console.log("call playVideo");
+			const promise = video.play();
+			if (promise !== undefined) {
+				promise.then(_ => {
+					// Autoplay started!
+				}).catch(error => {
+					// Autoplay was prevented.
+					console.log("error : ", error);
+				});
+			}
+		}
+
+		/* addEvent */
+		const eventHandle = (evt) => {
+			const { type } = evt;
+
+			switch (type) {
+				case 'canplaythrough':
+					playVideo();
+					break;
+
+				default:
+					break;
+			}
+		}
+
+		const videoAddEvent = () => {
+			video.addEventListener("canplaythrough", eventHandle)
+		}
+		/* initHls */
+		const initHls = () => {
+			if (Hls.isSupported()) {
+				hls = new Hls({
+					autoStartLoad: false,
+				});
+				hls.loadSource(videoSrc);
+				hls.attachMedia(video);
+
+				hls.startLoad();
+			}
+			else {
+				video.src = videoSrc;
+			}
+		}
+
+		window.addEventListener('load', () => {
+			initVideo();
+			initHls();
+			videoAddEvent();
+		})
+
+	</script>
+</body>
+
+</html>
