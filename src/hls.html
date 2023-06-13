@@ -27,6 +27,7 @@
 		let videoSrc = 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8'
 		let hls = null;
 		let callEventCount = 0;
+		let initialPlay = false; //canplaythrough trigger 여러번 호출 방지
 		/* setVideo */
 		const initVideo = () => {
 			video = document.querySelector('#video')
@@ -69,19 +70,23 @@
 			switch (type) {
 				case 'canplaythrough':
 					console.log("canplaythrough");
-					videoPromiseRetry()
-						.then(result => {
-							console.log(result);
-						})
-						.catch(err => {
-							if (err.name === 'FailRetry') {
-								alert("재생버튼을 클릭해주세요")
-							}
-							else {
-								alert("관리자에게 문의해주세요")
-							}
-							console.error("videoPromiseRetry error : ", err.name);
-						})
+					if (!initialPlay) {
+						initialPlay = true;
+						videoPromiseRetry()
+							.then(result => {
+								console.log(result);
+							})
+							.catch(err => {
+								if (err.name === 'FailRetry') {
+									alert("재생버튼을 클릭해주세요")
+								}
+								else {
+									alert("관리자에게 문의해주세요")
+								}
+								console.error("videoPromiseRetry error : ", err.name);
+							})
+					}
+
 					break;
 				case 'loadedmetadata':
 					console.log('loadedmetadata');
