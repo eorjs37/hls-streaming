@@ -20,7 +20,7 @@
 </head>
 
 <body>
-	<video id="video" controls playsinline></video>
+	<video id="video" controls playsinline autoplay></video>
 
 	<script>
 		let video = null;
@@ -72,10 +72,9 @@
 		}
 
 		/* promise retry video*/
-		const videoPromiseRetry = () => {
-			console.log(`call videoPromiseRetry ${callEventCount}`);
-			callEventCount++;
+		const videoPromiseRetry = (retryCount = 3) => {
 			return new Promise((resolve, reject) => {
+
 				const promise = video.play();
 				promise.then(() => {
 					resolve('videoPromiseRetry success')
@@ -106,6 +105,9 @@
 				case 'canplay':
 					console.log("canplay");
 					break;
+				case 'loadedmetadata':
+					console.log('loadedmetadata');
+					break;
 
 				default:
 					break;
@@ -115,7 +117,8 @@
 		/* add video event */
 		const videoAddEvent = () => {
 			video.addEventListener("canplaythrough", eventHandle);
-			video.addEventListener("canplay", eventHandle)
+			video.addEventListener("canplay", eventHandle);
+			video.addEventListener("loadedmetadata", eventHandle)
 		}
 
 		/* initHls */
@@ -131,11 +134,6 @@
 			}
 			else {
 				video.src = videoSrc;
-
-				//video.play();
-				setTimeout(() => {
-					video.play();
-				}, 5000)
 			}
 		}
 		/* window load */
