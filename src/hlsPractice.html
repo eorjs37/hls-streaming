@@ -51,6 +51,7 @@
 						break;
 					case Hls.ErrorTypes.NETWORK_ERROR:
 						console.error('fatal network error encountered', data);
+
 						break;
 					default:
 						break;
@@ -82,6 +83,8 @@
 			if (Hls.isSupported()) {
 				hls = new Hls({
 					autoStartLoad: false,
+					maxNumRetry: 500,
+					backoff: 'linear'
 				});
 
 				/* src를 video에 올린상태(재생가능한상태 아님) */
@@ -89,7 +92,7 @@
 				/* 매니페스트가 구문 분석된 후 실행됨 */
 				hls.on(Hls.Events.MANIFEST_PARSED, hlsEvent)
 				/* error handling */
-				hls.on(Hls.Events.ERROR, hlsEvent)
+				hls.on(Hls.Events.ERROR, hlsEvent);
 
 				hls.loadSource(videoSrc);
 				hls.attachMedia(video);
