@@ -30,6 +30,7 @@
 	<script>
 		/* video Element */
 		let video = null;
+		let hls = null;
 		/* 샘플 m3u8 url */
 		let videoSrc = 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8'
 
@@ -38,12 +39,58 @@
 			video = document.querySelector('#video')
 		}
 
+		/* hls error handle */
+		const hlsErrorHandle = (data) => {
+			const { type, fatal } = data;
+			console.log('fatal : ', fatal);
+			if (fatal) {
+				switch (type) {
+					case Hls.ErrorTypes.MEDIA_ERROR:
+						console.log('fatal media error encountered, try to recover');
+						hls.recoverMediaError();
+						break;
+					case Hls.ErrorTypes.NETWORK_ERROR:
+						console.error('fatal network error encountered', data);
+						break;
+					default:
+						break;
+				}
+			}
+		}
+
+
+		/* hls event */
+		const hlsEvent = (event, data) => {
+			switch (event) {
+				case 'hlsManifestParsed':
+					console.log("src를 hls에 붙인상태 재생가능한 상태 아님");
+					break;
+				case 'hlsMediaAttached':
+					console.log("매니페스트가 구문 분석된 후 실행됨");
+					break;
+				case 'hlsError':
+					hlsErrorHandle(data)
+					break;
+
+				default:
+					break;
+			}
+		}
+
 		/* initHls */
 		const initHls = () => {
 			if (Hls.isSupported()) {
 				hls = new Hls({
 					autoStartLoad: false,
 				});
+
+				/* src를 video에 올린상태(재생가능한상태 아님) */
+				hls.on(Hls.Events.MEDIA_ATTACHED, hlsEvent);
+				/* 매니페스트가 구문 분석된 후 실행됨 */
+				hls.on(Hls.Events.MANIFEST_PARSED, hlsEvent)
+				/* error handling */
+				hls.on(Hls.Events.ERROR, hlsEvent)
+
 				hls.loadSource(videoSrc);
 				hls.attachMedia(video);
 				hls.startLoad();
