@@ -32,11 +32,16 @@
 		let video = null;
 		let hls = null;
 		/* 샘플 m3u8 url */
-		let videoSrc = 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8'
+		//https://www.aplayz.co.kr/broadcast/f51c12c738994fa93836de7e1af53935.m3u8
+		let videoSrc = 'https://www.aplayz.co.kr/broadcast/f51c12c738994fa93836de7e1af53935.m3u8'
 
 		/* initVideo */
 		const initVideo = () => {
 			video = document.querySelector('#video')
+		}
+
+		const addVideoEvent = () => {
+			video.addEventListener("error", () => { })
 		}
 
 
@@ -44,15 +49,18 @@
 		const hlsErrorHandle = (data) => {
 			const { type, fatal } = data;
 			console.log('fatal : ', fatal);
+			console.log('data : ', data);
 			if (fatal) {
 				switch (type) {
 					case Hls.ErrorTypes.MEDIA_ERROR:
 						console.log('fatal media error encountered, try to recover');
+						hls.recoverMediaError();
 						break;
 					case Hls.ErrorTypes.NETWORK_ERROR:
 						console.error('fatal network error encountered', data);
 
 						break;
+
 					default:
 						break;
 				}
@@ -62,6 +70,7 @@
 
 		/* hls event */
 		const hlsEvent = (event, data) => {
+			console.log("eventName : ", event);
 			switch (event) {
 				case 'hlsManifestParsed':
 					console.log("src를 hls에 붙인상태 재생가능한 상태 아님");
@@ -82,7 +91,9 @@
 		const initHls = () => {
 			if (Hls.isSupported()) {
 				hls = new Hls({
-					autoStartLoad: false
+					autoStartLoad: false,
+					maxBufferLength: 10,
+					maxBufferHole: 9999,
 				});
 
 				/* src를 video에 올린상태(재생가능한상태 아님) */
@@ -91,6 +102,12 @@
 				hls.on(Hls.Events.MANIFEST_PARSED, hlsEvent)
 				/* error handling */
 				hls.on(Hls.Events.ERROR, hlsEvent);
+				/* Hls.Events.BUFFER_EOS */
+				hls.on(Hls.Events.BUFFER_EOS, hlsEvent)
+				/* Hls.Events.MANIFEST_LOADING */
+				hls.on(Hls.Events.MANIFEST_LOADING, hlsEvent)
+				/* Hls.Events.ERROR */
+				hls.on(Hls.Events.ERROR, hlsEvent)
 
 				hls.loadSource(videoSrc);
 				hls.attachMedia(video);
@@ -106,13 +123,18 @@
 		window.addEventListener("DOMContentLoaded", () => {
 			initVideo();
 			initHls();
+
+
+			addVideoEvent();
 		});
 
 		window.addEventListener("online", () => {
 			console.log("You are now connected to the network.");
-			const curTime = video.currentTime;
+			const currentTime = video.currentTime;
 			hls.recoverMediaError();
-			hls.startLoad(curTime)
+			hls.startLoad(currentTime);
+			//hls.startLoad(-1);
+
 		})
 	</script>
 </body>

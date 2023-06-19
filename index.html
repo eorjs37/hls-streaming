@@ -2,180 +2,179 @@
 <html lang="en">
 
 <head>
-	<meta charset="UTF-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-	<script src="https://vjs.zencdn.net/8.3.0/video.min.js"></script>
-	<title>Document
-	</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://vjs.zencdn.net/8.3.0/video.min.js"></script>
+    <title>Document</title>
 </head>
 
 <body>
-	<video id="video" controls preload="none" width="400" height="400" muted="muted" autoplay></video>
-	<button id="dummybtn" onclick="setMuted()">ddd</button>
-	<button id="dummyPlayBtn" onclick="playVideo()">ddd</button>
-	<script>
-		var video = document.getElementById('video');
+    <video id="video" controls preload="none" width="400" height="400" muted="muted" autoplay></video>
+    <button id="dummybtn" onclick="setMuted()">ddd</button>
+    <button id="dummyPlayBtn" onclick="playVideo()">ddd</button>
+    <script>
+        var video = document.getElementById('video');
 
-		const playVideo = () => {
-			const promise = video.play();
-			if (promise !== undefined) {
-				promise.then(_ => {
-					// Autoplay started!
-					console.log("!!!");
-				}).catch(error => {
-					// Autoplay was prevented.
-					// Show a "Play" button so that user can start playback.
-					console.log("error : ", error);
-				});
+        const playVideo = () => {
+            const promise = video.play();
+            if (promise !== undefined) {
+                promise.then(_ => {
+                    // Autoplay started!
+                    console.log("!!!");
+                }).catch(error => {
+                    // Autoplay was prevented.
+                    // Show a "Play" button so that user can start playback.
+                    console.log("error : ", error);
+                });
 
-			}
-		}
+            }
+        }
 
-		const setMuted = () => {
-			video.muted = false;
-			const dummyPlayBtn = document.querySelector('#dummyPlayBtn');
-			setTimeout(() => {
-				dummyPlayBtn.click();
-			}, 1000)
+        const setMuted = () => {
+            video.muted = false;
+            const dummyPlayBtn = document.querySelector('#dummyPlayBtn');
+            setTimeout(() => {
+                dummyPlayBtn.click();
+            }, 1000)
 
-		}
+        }
 
-		video.addEventListener('waiting', (event) => {
-			console.log('wating : ', event);
-		})
+        video.addEventListener('waiting', (event) => {
+            console.log('wating : ', event);
+        })
 
-		video.addEventListener('loadstart', (event) => {
-			console.log('loadstart : ', event);
-		})
-		video.addEventListener('error', (event) => {
-			console.log('error : ', event);
-		})
+        video.addEventListener('loadstart', (event) => {
+            console.log('loadstart : ', event);
+        })
+        video.addEventListener('error', (event) => {
+            console.log('error : ', event);
+        })
 
-		video.addEventListener('loadeddata', (event) => {
-			console.log('loadeddata : ', event);
-		})
+        video.addEventListener('loadeddata', (event) => {
+            console.log('loadeddata : ', event);
+        })
 
-		video.addEventListener('ended', (event) => {
-			console.log('ended : ', event);
-		})
+        video.addEventListener('ended', (event) => {
+            console.log('ended : ', event);
+        })
 
-		video.addEventListener("abort", (event) => {
-			console.log('aborted : ', event);
-		});
+        video.addEventListener("abort", (event) => {
+            console.log('aborted : ', event);
+        });
 
-		video.addEventListener("timeupdate", (event) => {
-			console.log('timeupdate : ', event);
-		});
+        video.addEventListener("timeupdate", (event) => {
+            console.log('timeupdate : ', event);
+        });
 
-		video.addEventListener("progress", (event) => {
-			console.log('progress : ', event);
+        video.addEventListener("progress", (event) => {
+            console.log('progress : ', event);
 
-		});
+        });
 
-		video.addEventListener("canplay", (event) => {
-			console.log("canplay : ", event);
-			setTimeout(() => {
-				const btn = document.getElementById('dummybtn')
-				btn.click();
-			}, 2000)
-		});
+        video.addEventListener("canplay", (event) => {
+            console.log("canplay : ", event);
+            setTimeout(() => {
+                const btn = document.getElementById('dummybtn')
+                btn.click();
+            }, 2000)
+        });
 
-		video.addEventListener("durationchange", (event) => {
-			console.log("durationchange : ", event);
+        video.addEventListener("durationchange", (event) => {
+            console.log("durationchange : ", event);
 
-		});
+        });
 
-		video.addEventListener("emptied", (event) => {
-			console.log("emptied : ", event);
+        video.addEventListener("emptied", (event) => {
+            console.log("emptied : ", event);
 
-		});
+        });
 
-		video.addEventListener("stalled", (event) => {
-			console.log("stalled : ", event);
-		});
+        video.addEventListener("stalled", (event) => {
+            console.log("stalled : ", event);
+        });
 
-		video.addEventListener('loadedmetadata', (event) => {
-			console.log("loadedmetadata : ", event);
+        video.addEventListener('loadedmetadata', (event) => {
+            console.log("loadedmetadata : ", event);
 
-		})
+        })
 
-		video.addEventListener("suspend", (event) => {
-			console.log("suspend : ", event);
-		});
-
-
+        video.addEventListener("suspend", (event) => {
+            console.log("suspend : ", event);
+        });
 
 
-		//https://www.aplayz.co.kr/broadcast/8ab9c835e271acacd4a0ad5620239693.m3u8
-		//https://www.aplayz.co.kr/broadcast/2164d5ef08db7f6be0fe2cda1c4a2605.m3u8
-		var videoSrc = 'https://www.aplayz.co.kr/broadcast/2164d5ef08db7f6be0fe2cda1c4a2605.m3u8'; // <- 테스트 URL 이므로 본인의 URL 작성
 
-		//
-		// 우선 HLS를 지원하는지 체크
-		//
-		if (Hls.isSupported()) {
-			var hls = new Hls({
-				autoStartLoad: false,
-			});
-			hls.loadSource(videoSrc);
-			hls.attachMedia(video);
 
-			hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+        //https://www.aplayz.co.kr/broadcast/8ab9c835e271acacd4a0ad5620239693.m3u8
+        //https://www.aplayz.co.kr/broadcast/2164d5ef08db7f6be0fe2cda1c4a2605.m3u8
+        var videoSrc = 'https://www.aplayz.co.kr/broadcast/2164d5ef08db7f6be0fe2cda1c4a2605.m3u8'; // <- 테스트 URL 이므로 본인의 URL 작성
 
-				hls.startLoad();
+        //
+        // 우선 HLS를 지원하는지 체크
+        //
+        if (Hls.isSupported()) {
+            var hls = new Hls({
+                autoStartLoad: false,
+            });
+            hls.loadSource(videoSrc);
+            hls.attachMedia(video);
 
-				// video.muted = true;
-				// video.play();
+            hls.on(Hls.Events.MEDIA_ATTACHED, function () {
 
-				setTimeout(() => {
-					const btn = document.getElementById('dummybtn')
-					btn.click();
-				}, 2000)
-			});
+                hls.startLoad();
 
-			hls.on(Hls.Events.AUDIO_TRACK_SWITCHING, () => {
-				console.log(`AUDIO_TRACK_SWITCHING`);
-			})
+                // video.muted = true;
+                // video.play();
 
-			hls.on(Hls.Events.MANIFEST_LOADED, () => {
-				console.log(`MANIFEST_LOADED`);
-			})
+                setTimeout(() => {
+                    const btn = document.getElementById('dummybtn')
+                    btn.click();
+                }, 2000)
+            });
 
-			hls.on(Hls.Events.BUFFER_FLUSHED, () => {
-				console.log(`BUFFER_FLUSHED`);
-			})
+            hls.on(Hls.Events.AUDIO_TRACK_SWITCHING, () => {
+                console.log(`AUDIO_TRACK_SWITCHING`);
+            })
 
-			hls.on(Hls.Events.ERROR, (event, data) => {
-				console.error("error : ", data);
-				if (data.fatal) {
-					switch (data.type) {
-						case Hls.ErrorTypes.MEDIA_ERROR:
-							console.log('fatal media error encountered, try to recover');
-							hls.recoverMediaError();
-							break;
-						case Hls.ErrorTypes.NETWORK_ERROR:
-							console.error('fatal network error encountered', data);
-							// All retries and media options have been exhausted.
-							// Immediately trying to restart loading could cause loop loading.
-							// Consider modifying loading policies to best fit your asset and network
-							// conditions (manifestLoadPolicy, playlistLoadPolicy, fragLoadPolicy).
-							hls.recoverMediaError();
-							break;
-						default:
-							// cannot recover
-							hls.destroy();
-							break;
-					}
-				}
-			})
-		}
-		else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-			video.src = videoSrc;
+            hls.on(Hls.Events.MANIFEST_LOADED, () => {
+                console.log(`MANIFEST_LOADED`);
+            })
 
-		} 
-	</script>
+            hls.on(Hls.Events.BUFFER_FLUSHED, () => {
+                console.log(`BUFFER_FLUSHED`);
+            })
+
+            hls.on(Hls.Events.ERROR, (event, data) => {
+                console.error("error : ", data);
+                if (data.fatal) {
+                    switch (data.type) {
+                        case Hls.ErrorTypes.MEDIA_ERROR:
+                            console.log('fatal media error encountered, try to recover');
+                            hls.recoverMediaError();
+                            break;
+                        case Hls.ErrorTypes.NETWORK_ERROR:
+                            console.error('fatal network error encountered', data);
+                            // All retries and media options have been exhausted.
+                            // Immediately trying to restart loading could cause loop loading.
+                            // Consider modifying loading policies to best fit your asset and network
+                            // conditions (manifestLoadPolicy, playlistLoadPolicy, fragLoadPolicy).
+                            hls.recoverMediaError();
+                            break;
+                        default:
+                            // cannot recover
+                            hls.destroy();
+                            break;
+                    }
+                }
+            })
+        }
+        else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = videoSrc;
+
+        } 
+    </script>
 </body>
 
 </html>
