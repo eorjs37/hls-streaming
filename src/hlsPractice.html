@@ -33,7 +33,9 @@
 		let hls = null;
 		/* 샘플 m3u8 url */
 		//https://www.aplayz.co.kr/broadcast/f51c12c738994fa93836de7e1af53935.m3u8
-		let videoSrc = 'https://www.aplayz.co.kr/broadcast/f51c12c738994fa93836de7e1af53935.m3u8'
+		//https://www.aplayz.co.kr/broadcast/5f21d0e4ed8a7b4837fb378655ef549a.m3u8
+		//https://dev.www.aplayz.co.kr/broadcast/bcdf88a9ad1840908398c06dce541446.m3u8
+		let videoSrc = 'https://www.aplayz.co.kr/broadcast/0ee46dc8743e8201460415f4338e2f83.m3u8'
 
 		/* initVideo */
 		const initVideo = () => {
@@ -41,7 +43,17 @@
 		}
 
 		const addVideoEvent = () => {
+			video.addEventListener("canplaythrough", () => {
+				console.log("canplaythrough");
+			})
 			video.addEventListener("error", () => { })
+		}
+
+		const customLoader = () => {
+			this.load = function (context, config, callbacks) {
+				console.log('context : ', context);
+			};
+
 		}
 
 
@@ -65,6 +77,17 @@
 						break;
 				}
 			}
+			else {
+				switch (type) {
+					case Hls.ErrorTypes.NETWORK_ERROR:
+						console.error('error fatal network error encountered', data);
+						//hls.recoverMediaError();
+						break;
+					default:
+						break;
+				}
+
+			}
 		}
 
 
@@ -86,14 +109,26 @@
 					break;
 			}
 		}
+		var customFragmentLoader = function () {
+			// See `loader` for details.
+		};
 
 		/* initHls */
 		const initHls = () => {
 			if (Hls.isSupported()) {
 				hls = new Hls({
 					autoStartLoad: false,
-					maxBufferLength: 10,
+					maxBufferLength: 30,
+					backBufferLength: Infinity,
+					maxBufferSize: 60 * 1000 * 1000,
 					maxBufferHole: 9999,
+					maxBufferLength: 30,
+					debug: false,
+					fragLoadingTimeOut: 30000,
+					fragLoadingMaxRetry: 10,
+					fragLoadingMaxRetryTimeout: 100000,
+					liveSyncDurationCount: 0,
+					// liveDurationInfinity: true
 				});
 
 				/* src를 video에 올린상태(재생가능한상태 아님) */
@@ -112,6 +147,7 @@
 				hls.loadSource(videoSrc);
 				hls.attachMedia(video);
 				hls.startLoad(-1);
+
 			}
 			/* ios/safari 같은 경우에 hls가 built-in 되어있다.*/
 			else {
@@ -130,9 +166,17 @@
 
 		window.addEventListener("online", () => {
 			console.log("You are now connected to the network.");
-			const currentTime = video.currentTime;
-			hls.recoverMediaError();
-			hls.startLoad(currentTime);
+			setTimeout(() => {
+				// const currentTime = video.currentTime;
+				// video.play();
+				// hls.swapAudioCodec()
+			}, 3000)
+
+
+			// hls.loadSource(videoSrc);
+			// hls.attachMedia(video);
+			// hls.startLoad(-1);
+			//hls.startLoad(currentTime);
 			//hls.startLoad(-1);
 
 		})
