@@ -24,7 +24,9 @@
 
 	<script>
 		let video = null;
-		let videoSrc = 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8'
+		//https://dev.www.aplayz.co.kr/broadcast/1e5666ddc42fd171494b685389c45f12.m3u8
+		//https://www.aplayz.co.kr/broadcast/844f938d8b0304022d828628035c9f68.m3u8
+		const videoSrc = 'https://www.aplayz.co.kr/broadcast/844f938d8b0304022d828628035c9f68.m3u8'
 		let hls = null;
 		let initialPlay = false; //canplaythrough trigger 여러번 호출 방지
 		/* setVideo */
@@ -61,7 +63,38 @@
 			})
 		}
 
+		/* hls error handle */
+		const hlsErrorHandle = (event, data) => {
 
+			const { type, fatal, details } = data;
+			if (fatal) {
+
+				console.log("data : ", data);
+				console.log("type : ", type);
+
+				switch (type) {
+					case Hls.ErrorTypes.MEDIA_ERROR:
+						console.log('fatal media error encountered, try to recover');
+
+
+						break;
+					case Hls.ErrorTypes.NETWORK_ERROR:
+						console.error('fatal network error encountered', data);
+						if (details === 'fragLoadError') {
+							alert("인터넷 연결이 원할하지 않습니다.")
+							video.pause();
+						}
+						break;
+
+					default:
+						break;
+				}
+			}
+		}
+
+		const onPlay = () => {
+			hls.startLoad();
+		}
 		/* eventHandle  */
 		const eventHandle = (evt) => {
 			const { type } = evt;
@@ -100,7 +133,11 @@
 		const videoAddEvent = () => {
 			video.addEventListener("canplaythrough", eventHandle);
 			video.addEventListener("canplay", eventHandle);
-			video.addEventListener("loadedmetadata", eventHandle)
+			video.addEventListener("loadedmetadata", eventHandle);
+			video.addEventListener("play", (evt) => {
+				console.log("play evt : ", evt);
+				hls.startLoad();
+			})
 		}
 
 		/* initHls */
@@ -108,9 +145,24 @@
 			if (Hls.isSupported()) {
 				hls = new Hls({
 					autoStartLoad: false,
+					enableWorker: false,
+					fragLoadPolicy: {
+						default: {
+							maxTimeToFirstByteMs: 8000,
+							maxLoadTimeMs: 120000,
+							timeoutRetry: {
+								maxNumRetry: 50,
+								retryDelayMs: 1000,
+								maxRetryDelayMs: 1000,
+							}
+						}
+					}
 				});
 				hls.loadSource(videoSrc);
 				hls.attachMedia(video);
+
+				/* Hls.Events.ERROR */
+				hls.on(Hls.Events.ERROR, hlsErrorHandle)
 
 				hls.startLoad();
 			}

@@ -2,185 +2,184 @@
 <html lang="en">
 
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<!-- hls 라이브러리를 cdn 방식으로 추가해준다. -->
-	<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-	<script src="https://vjs.zencdn.net/8.3.0/video.min.js"></script>
-	<title>Hls Practice</title>
-	<style>
-		video {
-			max-width: 500px;
-			width: 100%;
-			max-height: 500px;
-			height: 100%;
-			object-fit: fill;
-		}
-	</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- hls 라이브러리를 cdn 방식으로 추가해준다. -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://vjs.zencdn.net/8.3.0/video.min.js"></script>
+    <title>Hls Practice</title>
+    <style>
+        video {
+            max-width: 500px;
+            width: 100%;
+            max-height: 500px;
+            height: 100%;
+            object-fit: fill;
+        }
+    </style>
 </head>
 
 <body>
-	<!--
+    <!--
 		controls : 사용자가 비디오 컨트롤이 가능하게 할 수 있다
 		playsinline : 전체 화면 방지이다
 		autoplay : 자동재생이며 , 정책상 음소거 상태에서 가능하다.
 	-->
-	<video id="video" controls playsinline autoplay></video>
+    <video id="video" controls playsinline autoplay></video>
 
-	<script>
-		/* video Element */
-		let video = null;
-		let hls = null;
-		/* 샘플 m3u8 url */
-		//https://www.aplayz.co.kr/broadcast/f51c12c738994fa93836de7e1af53935.m3u8
-		//https://www.aplayz.co.kr/broadcast/5f21d0e4ed8a7b4837fb378655ef549a.m3u8
-		//https://dev.www.aplayz.co.kr/broadcast/bcdf88a9ad1840908398c06dce541446.m3u8
-		let videoSrc = 'https://www.aplayz.co.kr/broadcast/0ee46dc8743e8201460415f4338e2f83.m3u8'
+    <script>
+        /* video Element */
+        let video = null;
+        let hls = null;
+        /* 샘플 m3u8 url */
+        //https://www.aplayz.co.kr/broadcast/f51c12c738994fa93836de7e1af53935.m3u8
+        //https://www.aplayz.co.kr/broadcast/5f21d0e4ed8a7b4837fb378655ef549a.m3u8
+        //https://dev.www.aplayz.co.kr/broadcast/bcdf88a9ad1840908398c06dce541446.m3u8
+        //https://www.aplayz.co.kr/broadcast/1fa3bf76bef899ba89a356580f66c1a7.m3u8
+        const videoSrc = 'https://www.aplayz.co.kr/broadcast/1fa3bf76bef899ba89a356580f66c1a7.m3u8'
 
-		/* initVideo */
-		const initVideo = () => {
-			video = document.querySelector('#video')
-		}
+        /* initVideo */
+        const initVideo = () => {
+            video = document.querySelector('#video')
+        }
 
-		const addVideoEvent = () => {
-			video.addEventListener("canplaythrough", () => {
-				console.log("canplaythrough");
-			})
-			video.addEventListener("error", () => { })
-		}
+        const addVideoEvent = () => {
+            video.addEventListener("canplaythrough", () => {
+                console.log("canplaythrough");
+            })
+            video.addEventListener("error", () => { })
+        }
 
-		const customLoader = () => {
-			this.load = function (context, config, callbacks) {
-				console.log('context : ', context);
-			};
+        const customLoader = () => {
+            this.load = function (context, config, callbacks) {
+                console.log('context : ', context);
+            };
 
-		}
-
-
-		/* hls error handle */
-		const hlsErrorHandle = (data) => {
-			const { type, fatal } = data;
-			console.log('fatal : ', fatal);
-			console.log('data : ', data);
-			if (fatal) {
-				switch (type) {
-					case Hls.ErrorTypes.MEDIA_ERROR:
-						console.log('fatal media error encountered, try to recover');
-						//hls.recoverMediaError();
-						break;
-					case Hls.ErrorTypes.NETWORK_ERROR:
-						console.error('fatal network error encountered', data);
-
-						break;
-
-					default:
-						break;
-				}
-			}
-			else {
-				switch (type) {
-					case Hls.ErrorTypes.NETWORK_ERROR:
-						console.error('error fatal network error encountered', data);
-						//hls.recoverMediaError();
-						break;
-					default:
-						break;
-				}
-
-			}
-		}
+        }
 
 
-		/* hls event */
-		const hlsEvent = (event, data) => {
-			console.log("eventName : ", event);
-			switch (event) {
-				case 'hlsManifestParsed':
-					console.log("src를 hls에 붙인상태 재생가능한 상태 아님");
-					break;
-				case 'hlsMediaAttached':
-					console.log("매니페스트가 구문 분석된 후 실행됨");
-					break;
-				case 'hlsError':
-					hlsErrorHandle(data)
-					break;
+        /* hls error handle */
+        const hlsErrorHandle = (data) => {
+            const { type, fatal } = data;
+            console.log('fatal : ', fatal);
+            console.log('data : ', data);
+            if (fatal) {
+                switch (type) {
+                    case Hls.ErrorTypes.MEDIA_ERROR:
+                        console.log('fatal media error encountered, try to recover');
+                        //hls.recoverMediaError();
+                        break;
+                    case Hls.ErrorTypes.NETWORK_ERROR:
+                        console.error('fatal network error encountered', data);
 
-				default:
-					break;
-			}
-		}
-		var customFragmentLoader = function () {
-			// See `loader` for details.
-		};
+                        break;
 
-		/* initHls */
-		const initHls = () => {
-			if (Hls.isSupported()) {
-				hls = new Hls({
-					autoStartLoad: false,
-					maxBufferLength: 30,
-					backBufferLength: Infinity,
-					maxBufferSize: 60 * 1000 * 1000,
-					maxBufferHole: 9999,
-					maxBufferLength: 30,
-					debug: false,
-					fragLoadingTimeOut: 30000,
-					fragLoadingMaxRetry: 10,
-					fragLoadingMaxRetryTimeout: 100000,
-					liveSyncDurationCount: 0,
-					// liveDurationInfinity: true
-				});
+                    default:
+                        break;
+                }
+            }
+            else {
+                switch (type) {
+                    case Hls.ErrorTypes.NETWORK_ERROR:
+                        console.error('error fatal network error encountered', data);
+                        //hls.recoverMediaError();
+                        break;
+                    default:
+                        break;
+                }
 
-				/* src를 video에 올린상태(재생가능한상태 아님) */
-				hls.on(Hls.Events.MEDIA_ATTACHED, hlsEvent);
-				/* 매니페스트가 구문 분석된 후 실행됨 */
-				hls.on(Hls.Events.MANIFEST_PARSED, hlsEvent)
-				/* error handling */
-				hls.on(Hls.Events.ERROR, hlsEvent);
-				/* Hls.Events.BUFFER_EOS */
-				hls.on(Hls.Events.BUFFER_EOS, hlsEvent)
-				/* Hls.Events.MANIFEST_LOADING */
-				hls.on(Hls.Events.MANIFEST_LOADING, hlsEvent)
-				/* Hls.Events.ERROR */
-				hls.on(Hls.Events.ERROR, hlsEvent)
-
-				hls.loadSource(videoSrc);
-				hls.attachMedia(video);
-				hls.startLoad(-1);
-
-			}
-			/* ios/safari 같은 경우에 hls가 built-in 되어있다.*/
-			else {
-				video.src = videoSrc;
-			}
-		}
-
-		/* DOMContentLoaded 로드를 통해 video Element 담기*/
-		window.addEventListener("DOMContentLoaded", () => {
-			initVideo();
-			initHls();
+            }
+        }
 
 
-			addVideoEvent();
-		});
+        /* hls event */
+        const hlsEvent = (event, data) => {
+            console.log("eventName : ", event);
+            switch (event) {
+                case 'hlsManifestParsed':
+                    console.log("src를 hls에 붙인상태 재생가능한 상태 아님");
+                    break;
+                case 'hlsMediaAttached':
+                    console.log("매니페스트가 구문 분석된 후 실행됨");
+                    break;
+                case 'hlsError':
+                    hlsErrorHandle(data)
+                    break;
 
-		window.addEventListener("online", () => {
-			console.log("You are now connected to the network.");
-			setTimeout(() => {
-				// const currentTime = video.currentTime;
-				// video.play();
-				// hls.swapAudioCodec()
-			}, 3000)
+                default:
+                    break;
+            }
+        }
 
 
-			// hls.loadSource(videoSrc);
-			// hls.attachMedia(video);
-			// hls.startLoad(-1);
-			//hls.startLoad(currentTime);
-			//hls.startLoad(-1);
+        /* initHls */
+        const initHls = () => {
+            if (Hls.isSupported()) {
+                hls = new Hls({
+                    autoStartLoad: false,
+                    maxBufferLength: 30,
+                    backBufferLength: Infinity,
+                    maxBufferSize: 60 * 1000 * 1000,
+                    maxBufferHole: 9999,
+                    maxBufferLength: 30,
+                    debug: false,
+                    fragLoadingTimeOut: 30000,
+                    fragLoadingMaxRetry: 10,
+                    fragLoadingMaxRetryTimeout: 100000,
+                    liveSyncDurationCount: 0,
+                    // liveDurationInfinity: true
+                });
 
-		})
-	</script>
+                /* src를 video에 올린상태(재생가능한상태 아님) */
+                hls.on(Hls.Events.MEDIA_ATTACHED, hlsEvent);
+                /* 매니페스트가 구문 분석된 후 실행됨 */
+                hls.on(Hls.Events.MANIFEST_PARSED, hlsEvent)
+                /* error handling */
+                hls.on(Hls.Events.ERROR, hlsEvent);
+                /* Hls.Events.BUFFER_EOS */
+                hls.on(Hls.Events.BUFFER_EOS, hlsEvent)
+                /* Hls.Events.MANIFEST_LOADING */
+                hls.on(Hls.Events.MANIFEST_LOADING, hlsEvent)
+                /* Hls.Events.ERROR */
+                hls.on(Hls.Events.ERROR, hlsEvent)
+
+                hls.loadSource(videoSrc);
+                hls.attachMedia(video);
+                hls.startLoad(-1);
+
+            }
+            /* ios/safari 같은 경우에 hls가 built-in 되어있다.*/
+            else {
+                video.src = videoSrc;
+            }
+        }
+
+        /* DOMContentLoaded 로드를 통해 video Element 담기*/
+        window.addEventListener("DOMContentLoaded", () => {
+            initVideo();
+            initHls();
+
+
+            addVideoEvent();
+        });
+
+        window.addEventListener("online", () => {
+            console.log("You are now connected to the network.");
+            setTimeout(() => {
+                // const currentTime = video.currentTime;
+                // video.play();
+                // hls.swapAudioCodec()
+            }, 3000)
+
+
+            // hls.loadSource(videoSrc);
+            // hls.attachMedia(video);
+            // hls.startLoad(-1);
+            //hls.startLoad(currentTime);
+            //hls.startLoad(-1);
+
+        })
+    </script>
 </body>
 
 </html>
