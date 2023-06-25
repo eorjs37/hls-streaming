@@ -67,6 +67,7 @@
 		const hlsErrorHandle = (event, data) => {
 
 			const { type, fatal, details } = data;
+			console.log(" data : ", data);
 			if (fatal) {
 
 				console.log("data : ", data);
@@ -145,7 +146,24 @@
 			if (Hls.isSupported()) {
 				hls = new Hls({
 					autoStartLoad: false,
-					enableWorker: false,
+					maxBufferSize: 320 * 1000 * 1000,
+					steeringManifestLoadPolicy: {
+						default: {
+							maxTimeToFirstByteMs: 10000,
+							maxLoadTimeMs: 20000,
+							timeoutRetry: {
+								maxNumRetry: 1,
+								retryDelayMs: 1000,
+								maxRetryDelayMs: 5000,
+							},
+							errorRetry: {
+								maxNumRetry: 1,
+								retryDelayMs: 1000,
+								maxRetryDelayMs: 8000,
+							},
+						}
+
+					},
 					fragLoadPolicy: {
 						default: {
 							maxTimeToFirstByteMs: 8000,
