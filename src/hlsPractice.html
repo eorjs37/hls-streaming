@@ -117,17 +117,6 @@
             if (Hls.isSupported()) {
                 hls = new Hls({
                     autoStartLoad: false,
-                    maxBufferLength: 30,
-                    backBufferLength: Infinity,
-                    maxBufferSize: 60 * 1000 * 1000,
-                    maxBufferHole: 9999,
-                    maxBufferLength: 30,
-                    debug: false,
-                    fragLoadingTimeOut: 30000,
-                    fragLoadingMaxRetry: 10,
-                    fragLoadingMaxRetryTimeout: 100000,
-                    liveSyncDurationCount: 0,
-                    // liveDurationInfinity: true
                 });
 
                 /* src를 video에 올린상태(재생가능한상태 아님) */
