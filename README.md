@@ -7,6 +7,9 @@
 > Hls.js는 http live streaming을 구현하는 javascript 라이브러리입니다.  
 ios/safari 같은 경우 빌트인이 되어있기때문에 지원하지는 않고, 다른 브라우저에서는 Hls.js를 통해서 스트리밍이 가능합니다.
 
+### Hls Error Event
+
 
 ## Media Session API
 > Media Session을 통해 잠금화면시 현재 재생되고 있는 오디오/비디오의 정보 및 컨트롤이 가능하다.
+

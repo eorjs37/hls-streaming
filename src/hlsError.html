@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- hls 라이브러리를 cdn 방식으로 추가해준다. -->
+	<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+	<script src="https://vjs.zencdn.net/8.3.0/video.min.js"></script>
+	<title>Hls Error Handle</title>
+	<style>
+		video {
+			max-width: 500px;
+			width: 100%;
+			max-height: 500px;
+			height: 100%;
+			object-fit: fill;
+		}
+	</style>
+</head>
+
+<body>
+	<video id="video" controls playsinline autoplay></video>
+	<script>
+		/* video Element */
+		let video = null;
+		let hls = null;
+		let waitInterval = null;
+		let waitCount = 0
+		const videoSrc = "https://dev.stream.aplayz.co.kr/broadcast/42e2f0a63783e9371fe9b328f7c08186.m3u8";
+
+		/* initVideo */
+		const initVideo = () => {
+			video = document.querySelector('#video')
+		}
+
+		const addVideoEvent = () => {
+			video.addEventListener("waiting", (evt) => {
+				waitCount = 0;
+				console.log("waiting evt : ", evt);
+				waitInterval = setInterval(() => {
+					waitCount++;
+					console.log("waitCount : ", waitCount);
+					if (waitCount >= 60) {
+						clearInterval(waitInterval)
+						alert("인터넷 연결이 원할하지 않습니다.");
+					}
+				}, 1000)
+			})
+		}
+		/* hls error handle */
+		const hlsErrorHandle = (data) => {
+			const { type, fatal } = data;
+			console.log('data : ', data);
+
+			if (fatal) {
+				switch (type) {
+					case Hls.ErrorTypes.MEDIA_ERROR:
+						console.log('fatal media error encountered, try to recover');
+
+						break;
+					case Hls.ErrorTypes.NETWORK_ERROR:
+						console.error('fatal network error encountered', data);
+
+						break;
+
+					default:
+						break;
+				}
+			}
+		}
+
+		const hlsEvent = (event, data) => {
+			switch (event) {
+				case 'hlsError':
+					hlsErrorHandle(data)
+					break;
+
+				default:
+					break;
+			}
+		}
+
+		/* initHls */
+		const initHls = () => {
+			hls = new Hls({
+				autoStartLoad: false,
+				fragLoadPolicy: {
+					default: {
+						maxTimeToFirstByteMs: 10000,
+						maxLoadTimeMs: 120000,
+						timeoutRetry: {
+							maxNumRetry: 4,
+							retryDelayMs: 0,
+							maxRetryDelayMs: 0,
+						},
+						errorRetry: {
+							maxNumRetry: 10,
+							retryDelayMs: 1000,
+							maxRetryDelayMs: 8000,
+						},
+					},
+				},
+				//인터넷이 offline일때
+				playlistLoadPolicy: {
+					default: {
+						maxTimeToFirstByteMs: 10000,
+						maxLoadTimeMs: 20000,
+						timeoutRetry: {
+							maxNumRetry: 10,
+							retryDelayMs: 0,
+							maxRetryDelayMs: 0,
+						},
+						errorRetry: {
+							maxNumRetry: 5, //retry 횟수
+							retryDelayMs: 1000, // retry 시도 간격
+							maxRetryDelayMs: 8000, //???
+						},
+					},
+				},
+
+			});
+			/* Hls.Events.ERROR */
+			hls.on(Hls.Events.ERROR, hlsEvent)
+
+			hls.loadSource(videoSrc);
+			hls.attachMedia(video);
+			hls.startLoad(-1);
+		}
+
+		/* DOMContentLoaded 로드를 통해 video Element 담기*/
+		window.addEventListener("DOMContentLoaded", () => {
+			initVideo();
+			initHls();
+
+			addVideoEvent();
+		});
+
+	</script>
+</body>
+
+</html>
