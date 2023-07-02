@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>hls auto play</title>
+	<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+	<script src="https://vjs.zencdn.net/8.3.0/video.min.js"></script>
+	<style>
+		video {
+			max-width: 500px;
+			width: 100%;
+			max-height: 500px;
+			height: 100%;
+			object-fit: fill;
+		}
+	</style>
+</head>
+
+<body>
+	<video id="video" controls playsinline autoplay></video>
+
+	<script>
+		const videoSrc = 'https://www.aplayz.co.kr/broadcast/ec38ce97104f1ba907d510736889c893.m3u8';
+		let hls = null;
+		let initialPlay = false; //canplaythrough trigger 여러번 호출 방지
+
+		/* setVideo */
+		const initVideo = () => {
+			video = document.querySelector('#video')
+		}
+
+		/* promise retry video*/
+		const videoPromiseRetry = (retryCount = 3) => {
+			return new Promise((resolve, reject) => {
+				const retry = (attempt = 0) => {
+					const promise = video.play();
+					if (promise !== undefined) {
+						promise
+							.then(() => {
+								resolve('videoPromiseRetry success')
+							})
+							.catch(error => {
+								console.error("videoPromiseRetry error : ", error);
+								if (attempt < retryCount) {
+									console.error(`작업을 재시도 합니다. 남은 횟수 : ${retryCount - attempt}`);
+									setTimeout(() => retry(attempt + 1), 1000)
+								}
+								else {
+									const error = new Error('작업을 실패하였습니다.')
+									error.name = 'FailRetry';
+									reject(error)
+								}
+							})
+					}
+
+				}
+
+				retry(0)
+			})
+		}
+
+		/* add video event */
+		const videoAddEvent = () => {
+			video.addEventListener("canplaythrough", eventHandle);
+			video.addEventListener("play", (evt) => {
+				console.log("play evt : ", evt);
+				hls.startLoad();
+			})
+		}
+
+		/* eventHandle  */
+		const eventHandle = (evt) => {
+			const { type } = evt;
+
+			switch (type) {
+				case 'canplaythrough':
+					console.log("canplaythrough");
+					if (!initialPlay) {
+						initialPlay = true;
+						videoPromiseRetry()
+							.then(result => {
+								console.log("result :", result);
+								initialPlay = false;
+							})
+							.catch(err => {
+								if (err.name === 'FailRetry') {
+									alert("재생버튼을 클릭해주세요")
+								}
+								else {
+									alert("관리자에게 문의해주세요")
+								}
+								console.error("videoPromiseRetry error : ", err.name);
+							})
+					}
+					break;
+				default:
+					break;
+			}
+		}
+
+
+		const initHls = () => {
+			if (Hls.isSupported()) {
+				hls = new Hls({
+					autoStartLoad: false,
+					maxBufferSize: 320 * 1000 * 1000,
+					liveSyncDurationCount: 1,
+					highBufferWatchdogPeriod: 1,
+					nudgeMaxRetry: 99,
+					lowLatencyMode: false
+				});
+				hls.loadSource(videoSrc);
+				hls.attachMedia(video);
+				hls.startLoad();
+			}
+			else {
+				video.src = videoSrc;
+			}
+		}
+
+		/* window load */
+		window.addEventListener('DOMContentLoaded', () => {
+			initVideo();
+			initHls();
+			videoAddEvent();
+		})
+	</script>
+</body>
+
+</html>
