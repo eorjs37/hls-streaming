@@ -20,10 +20,11 @@
 
 <body>
 	<video id="video" controls autoplay muted playsinline></video>
+	<button onclick="setSrc()">Set Src</button>
 	<button onclick="playBtn()">Play</button>
 	<button onclick="pauseBtn()">Pause</button>
 	<script>
-		const videoSrc = 'https://stream.aplayz.co.kr/broadcast/b6770383cbedb2b8272242dd9e572a11.m3u8';
+		const videoSrc = 'https://stream.aplayz.co.kr/broadcast/e32af15e77a0d79cf849323e1cf7c7a2.m3u8';
 		let hls = null;
 		let initialPlay = false; //canplaythrough trigger 여러번 호출 방지
 		let video = null;
@@ -65,10 +66,22 @@
 		/* add video event */
 		const videoAddEvent = () => {
 			video.addEventListener("canplaythrough", eventHandle);
+
+
 			video.addEventListener("play", (evt) => {
 				console.log("play evt : ", evt);
+				navigator.mediaSession.playbackState = 'playing';
+
+
 				//hls.startLoad();
 			});
+
+
+
+
+			video.addEventListener("pause", (evt) => {
+				navigator.mediaSession.playbackState = 'paused';
+			})
 		}
 
 		/* eventHandle  */
@@ -78,23 +91,6 @@
 			switch (type) {
 				case 'canplaythrough':
 					console.log("canplaythrough");
-					// if (!initialPlay) {
-					// 	initialPlay = true;
-					// 	videoPromiseRetry()
-					// 		.then(result => {
-					// 			console.log("result :", result);
-					// 			initialPlay = false;
-					// 		})
-					// 		.catch(err => {
-					// 			if (err.name === 'FailRetry') {
-					// 				alert("재생버튼을 클릭해주세요")
-					// 			}
-					// 			else {
-					// 				alert("관리자에게 문의해주세요")
-					// 			}
-					// 			console.error("videoPromiseRetry error : ", err.name);
-					// 		})
-					// }
 					break;
 				default:
 					break;
@@ -125,15 +121,46 @@
 		const playBtn = () => {
 			video.play().then(() => {
 				video.muted = false;
-				// navigator.mediaSession.metadata = new MediaMetadata({
-				// 	title: '제목',      // Optional
-				// 	artist: '아티스트명', // Optional
-				// 	album: '앨범명',     // Optional
-				// });
+				video.pause();
 
-				// navigator.mediaSession.playbackState = "playing"
+				setTimeout(() => {
+					video.play();
+				}, 2000)
 			})
 
+		}
+
+		const setSrc = () => {
+
+			initHls();
+
+
+			if ("mediaSession" in navigator) {
+				navigator.mediaSession.metadata = new MediaMetadata({
+					title: "Podcast Episode Title",
+					artist: "Podcast Host",
+					album: "Podcast Name",
+					artwork: [{ src: "https://www.aplayz.co.kr/media/images/ev_main_con01_logo.png" }],
+				});
+
+				navigator.mediaSession.setActionHandler("play", () => {
+					/* Code excerpted. */
+				});
+				navigator.mediaSession.setActionHandler("pause", () => {
+					/* Code excerpted. */
+				});
+				navigator.mediaSession.setActionHandler("stop", null);
+				navigator.mediaSession.setActionHandler("seekbackward", null);
+				navigator.mediaSession.setActionHandler("seekforward", null);
+				navigator.mediaSession.setActionHandler("seekto", null);
+				navigator.mediaSession.setActionHandler("previoustrack", () => {
+					/* Code excerpted. */
+				});
+				navigator.mediaSession.setActionHandler("nexttrack", () => {
+					/* Code excerpted. */
+				});
+				navigator.mediaSession.setActionHandler("skipad", null);
+			}
 		}
 
 		const pauseBtn = () => {
@@ -142,13 +169,8 @@
 		/* window load */
 		window.addEventListener('DOMContentLoaded', () => {
 			initVideo();
-			initHls();
 			videoAddEvent();
-			// navigator.mediaSession.metadata = null;
-			// navigator.mediaSession.playbackState = "none"
-			// if ('mediaSession' in navigator) {
-			// 	navigator.mediaSession.playbackState = 'playing';
-			// }
+
 		})
 	</script>
 </body>
