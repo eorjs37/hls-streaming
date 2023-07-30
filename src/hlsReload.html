@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+	<title>Hls Reload</title>
+	<style>
+		.container {
+			max-width: 1200px;
+			margin: 0 auto;
+			display: flex;
+			justify-content: center;
+		}
+
+		#video {
+			max-width: 400px;
+			width: 100%;
+		}
+
+		.btn_group {
+			display: flex;
+			justify-content: flex-start;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<video id="video" hidden autoplay controls playsinline></video>
+		<div class="btn_group">
+			<button onclick="videoObject.onPlay()">재생</button>
+			<button onclick="videoObject.onPause()">중지</button>
+		</div>
+	</div>
+	<script>
+		const src = 'https://stream.aplayz.co.kr/broadcast/370ba9e148a5fb2625cb139fb6c78752.m3u8'
+		const videoObject = {
+			video: null,
+			hls: null,
+			setVideoInit() {
+				if (Hls.isSupported()) {
+					this.hls = new Hls({
+						autoStartLoad: false,
+					});
+					this.hls.loadSource(src);
+					this.hls.attachMedia(this.video);
+					this.hls.startLoad(-1);
+				}
+			},
+			setVideo() {
+				this.video = document.querySelector('#video')
+			},
+			getVideo() {
+				return this.video
+			},
+			onPlay() {
+				console.log("onPlay");
+				this.setVideoInit();
+			},
+			onPause() {
+				console.log("onPause");
+				this.video.pause();
+			}
+		}
+
+		window.addEventListener("load", () => {
+			videoObject.setVideo();
+			videoObject.setVideoInit();
+		})
+	</script>
+</body>
+
+</html>
