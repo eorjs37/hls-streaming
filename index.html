@@ -11,18 +11,18 @@
 </head>
 
 <body>
-	<video id="video" hidden controls autoplay playsinline></video>
+	<video id="video" controls autoplay muted playsinline></video>
 	<button id="dummybtn" onclick="setMuted()">ddd</button>
 	<button id="dummyPlayBtn" onclick="playVideo()">ddd</button>
 	<script>
 		var video = document.getElementById('video');
-
+		let interval = null;
 		const playVideo = () => {
 			const promise = video.play();
 			if (promise !== undefined) {
 				promise.then(_ => {
 					// Autoplay started!
-
+					clearInterval(interval)
 					navigator.mediaSession.playbackState = 'playing';
 				}).catch(error => {
 					// Autoplay was prevented.
@@ -33,6 +33,8 @@
 			}
 		}
 
+
+
 		const setMuted = () => {
 			video.pause();
 
@@ -40,30 +42,43 @@
 
 		video.addEventListener("play", event => {
 			console.log("play music");
-			video.muted = false;
+			//video.muted = false;
+			const intal = setInterval(() => {
+				video.muted = false
+				if (!video.muted) {
+					clearInterval(intal)
+				}
+			}, 1000)
 			navigator.mediaSession.playbackState = 'playing';
 		});
 
 		video.addEventListener("pause", event => {
 			console.log("pause music");
 			navigator.mediaSession.playbackState = "paused";
-		})
+		});
+
 
 
 
 		//https://www.aplayz.co.kr/broadcast/8ab9c835e271acacd4a0ad5620239693.m3u8
 		//https://www.aplayz.co.kr/broadcast/2164d5ef08db7f6be0fe2cda1c4a2605.m3u8
-		var videoSrc = 'https://stream.aplayz.co.kr/broadcast/b6770383cbedb2b8272242dd9e572a11.m3u8'; // <- 테스트 URL 이므로 본인의 URL 작성
-
+		var videoSrc = 'https://stream.aplayz.co.kr/broadcast/19642cd2c002183eeb06862e745d7686.m3u8'; // <- 테스트 URL 이므로 본인의 URL 작성
+		let settingFn = null;
 		//
 		// 우선 HLS를 지원하는지 체크
 		//
 		if (Hls.isSupported()) {
-			var hls = new Hls({
-				autoStartLoad: false,
-			});
-			hls.loadSource(videoSrc);
-			hls.attachMedia(video);
+
+			settingFn = () => {
+				var hls = new Hls({
+					autoStartLoad: false,
+				});
+				hls.loadSource(videoSrc);
+				hls.attachMedia(video);
+			}
+
+
+
 
 			hls.on(Hls.Events.MEDIA_ATTACHED, function () {
 
@@ -76,6 +91,7 @@
 
 			hls.on(Hls.Events.MANIFEST_LOADED, () => {
 				console.log(`MANIFEST_LOADED`);
+				interval = setInterval(playVideo, 1000)
 			})
 
 			hls.on(Hls.Events.BUFFER_FLUSHED, () => {
