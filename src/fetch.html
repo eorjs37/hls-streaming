@@ -21,9 +21,10 @@
 <body>
 	<video id="video" controls playsinline autoplay></video>
 	<script>
+
 		let video = null;
 		/* 샘플 m3u8 url */
-		let videoSrc = 'https://stream.aplayz.co.kr/broadcast/f8538e7b5aa4a220bc383886329c6471.m3u8'
+		let videoSrc = 'https://stream.aplayz.co.kr/broadcast/3b6f565d03023255f9b510b22aedd555.m3u8'
 
 		/* initVideo */
 		const initVideo = () => {
@@ -35,16 +36,21 @@
 			if (Hls.isSupported()) {
 				hls = new Hls({
 					autoStartLoad: false,
+					renderTextTracksNatively: true
 				});
+
 				hls.loadSource(videoSrc);
 				hls.attachMedia(video);
 				hls.startLoad();
 
-				hls.on(Hls.Events.MANIFEST_LOADED, (event, data) => {
-					console.log(new Date() + " changed MANIFEST_LOADED");
-					console.log(data);
-				})
 
+
+				hls.on(Hls.Events.FRAG_CHANGED, (event, data) => {
+					if (data.frag.tagList.length > 1) {
+						console.log(`${new Date()} FRAG_CHANGED triggered`);
+						console.log(data.frag.tagList);
+					}
+				});
 			}
 			/* ios/safari 같은 경우에 hls가 built-in 되어있다.*/
 			else {
