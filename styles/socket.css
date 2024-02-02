@@ -1,0 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+.container {
+	max-width: 1200px;
+	width: 100%;
+	margin: 0 auto;
+}
+
+html,
+body {
+	font-family: 'Noto Sans KR', sans-serif;
+}
+
+.title {
+	font-size: 48px;
+
+	font-weight: 500;
+}
+
+.chat_list {
+	display: flex;
+	flex-direction: column;
+}
+
+.chat_item {
+	display: flex;
+}
