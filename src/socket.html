@@ -15,27 +15,70 @@
 	<div class="container">
 		<h1 class="title">SockJS</h1>
 		<ul class="chat_list">
-			<li class="chat_item">
-
+			<li class="chat_item me">
+				<div class="me_chat_contents">
+					안녕하세요
+				</div>
+			</li>
+			<li class="chat_item you">
+				<div class="me_chat_contents you">
+					잘지내시죠?
+				</div>
+			</li>
+			<li class="chat_item me">
+				<div class="me_chat_contents">
+					고럼용
+				</div>
+			</li>
+			<li class="chat_item me">
+				<div class="me_chat_contents">
+					ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ
+				</div>
 			</li>
 		</ul>
+		<div class="chat_input_box">
+			<input class="chattext" type="text" name="chattext" id="chattext">
+		</div>
 	</div>
 
 
 	<script>
+		window.addEventListener("DOMContentLoaded", contentloaded)
 		const sock = new SockJS('http://localhost:9090/ws/chat');
-		sock.onopen = function () {
-			console.log('open');
-			sock.send('test');
-		};
+		function contentloaded(event) {
+			/* sockJS */
 
-		sock.onmessage = function (e) {
-			console.log('message', e.data);
-		};
+			sock.onopen = function () {
+				console.log('open');
+			};
 
-		sock.onclose = function () {
-			console.log('close');
-		};
+			sock.onmessage = function (e) {
+				console.log(e);
+				console.log('message', e.data);
+			};
+
+			sock.onclose = function () {
+				console.log('close');
+			};
+			/* sockJS */
+		}
+
+		/* chattext event*/
+		const chatText = document.querySelector('#chattext');
+		chatText.addEventListener("input", inputEvent);
+		chatText.addEventListener("keyup", enterEvent)
+
+		function inputEvent() {
+		}
+		function enterEvent(event) {
+			if (event.keyCode === 13) {
+				sock.send(event.target.value);
+			}
+		}
+
+
+
+
 	</script>
 </body>
 
