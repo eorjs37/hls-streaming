@@ -1,0 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+body {
+	height: 100vh;
+	width: 100%;
+	font-family: 'Noto Sans KR', sans-serif;
+}
+
+.afeternoon {
+	background: url(../assets/images/afternoon_bg.png);
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+.mo_header {
+	position: fixed;
+	height: 67px;
+	width: 100%;
+	top: 13px;
+}
+
+.mo_nav {
+	max-width: 768px;
+	width: 90%;
+	margin: 0 auto;
+	height: 100%;
+	display: flex;
+	align-items: center;
+}
+
+
+.mo_menu {
+	display: flex;
+	width: 100%;
+	justify-content: space-between;
+}
+
+.main {
+	margin-top: 80px;
+}
+
+.space_name_wrap {
+	display: flex;
+	align-items: center;
+}
+
+.space_name {
+	font-size: 15px;
+	font-weight: 400;
+	color: var(--white);
+	line-height: 1.2;
+}
+
+.menu_right {
+	display: flex;
+}
+
+.hambuger_menu {
+	margin-left: 24px;
+}
