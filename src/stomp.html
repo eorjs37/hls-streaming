@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>SockJS</title>
+	<link rel="stylesheet" href="../styles/reset.css">
+	<link rel="stylesheet" href="../styles/_variables.css">
+	<link rel="stylesheet" href="../styles/socket.css">
+	<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+
+<body>
+	<div class="container">
+		<h1 class="title">SockJS</h1>
+		<ul class="chat_list">
+			<li class="chat_item me">
+				<div class="me_chat_contents">
+					안녕하세요
+				</div>
+			</li>
+			<li class="chat_item you">
+				<div class="me_chat_contents you">
+					잘지내시죠?
+				</div>
+			</li>
+			<li class="chat_item me">
+				<div class="me_chat_contents">
+					고럼용
+				</div>
+			</li>
+			<li class="chat_item me">
+				<div class="me_chat_contents">
+					ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ
+				</div>
+			</li>
+		</ul>
+		<div class="chat_input_box">
+			<input class="chattext" type="text" name="chattext" id="chattext">
+		</div>
+	</div>
+
+
+	<script>
+		window.addEventListener("DOMContentLoaded", contentloaded);
+		let sock = null;
+		let stompClient = null;
+		function contentloaded() {
+			sock = new SockJS(`http://15.165.120.8:9090/ws/chat`);
+			stompClient = Stomp.over(sock);
+
+			stompClient.connect({}, () => {
+				console.log("connected");
+			}, () => {
+				console.log("connected error");
+			})
+		}
+
+		/* chattext event*/
+		const chatText = document.querySelector('#chattext');
+		chatText.addEventListener("input", inputEvent);
+		chatText.addEventListener("keyup", enterEvent)
+
+		function inputEvent() {
+		}
+		function enterEvent(event) {
+
+		}
+
+
+
+
+	</script>
+</body>
+
+</html>
