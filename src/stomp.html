@@ -58,7 +58,8 @@
 
 		function contentloaded() {
 			init();
-			const url = window.location.host === '127.0.0.1:5500' ? 'http://localhost:9090' : 'http://15.165.120.8:9090'
+			//const url = window.location.host === '127.0.0.1:5500' ? 'http://localhost:9090' : 'http://15.165.120.8:9090'
+			const url = `http://15.165.120.8:9090`;
 			sock = new SockJS(`${url}/ws/chat`);
 			stompClient = Stomp.over(sock);
 
