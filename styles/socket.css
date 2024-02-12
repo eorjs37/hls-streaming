@@ -61,7 +61,7 @@ body {
 
 .chat_input_box {
 	position: absolute;
-	bottom: 0;
+	bottom: -30px;
 	left: 0;
 	width: 100%;
 	height: 30px;

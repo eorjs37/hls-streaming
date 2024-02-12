@@ -15,7 +15,7 @@
 <body>
 	<div class="container">
 		<h1 class="title">SockJS</h1>
-		<ul class="chat_list">
+		<ul class="chat_list" id="chatlist">
 			<li class="chat_item me">
 				<div class="me_chat_contents">
 					안녕하세요
@@ -47,28 +47,80 @@
 		window.addEventListener("DOMContentLoaded", contentloaded);
 		let sock = null;
 		let stompClient = null;
+		let parentChat = null;
+		function paretChat() {
+			return parentChat
+		}
+
+		function init() {
+			parentChat = document.querySelector('#chatlist')
+		}
+
 		function contentloaded() {
-			sock = new SockJS(`http://15.165.120.8:9090/ws/chat`);
+			init();
+			const url = window.location.host === '127.0.0.1:5500' ? 'http://localhost:9090' : 'http://15.165.120.8:9090'
+			sock = new SockJS(`${url}/ws/chat`);
 			stompClient = Stomp.over(sock);
 
-			stompClient.connect({}, () => {
-				console.log("connected");
-			}, () => {
-				console.log("connected error");
-			})
+			stompClient.connect({}, successConnected, errorConnected)
+		}
+
+		/**
+		 * @description : successConnected
+		 **/
+		function successConnected(frame) {
+			stompClient.subscribe('/topic/greetings', subscribe)
+		}
+		/**
+		 * @description : errorConnected
+		 **/
+		function errorConnected() {
+			console.log("error connected");
+		}
+
+		function subscribe(response) {
+			const { content } = JSON.parse(response.body);
+			if (content) {
+				otherChat(content)
+			}
 		}
 
 		/* chattext event*/
 		const chatText = document.querySelector('#chattext');
-		chatText.addEventListener("input", inputEvent);
-		chatText.addEventListener("keyup", enterEvent)
+		chatText.addEventListener("keydown", enterEvent)
 
-		function inputEvent() {
-		}
 		function enterEvent(event) {
-
+			if (event.keyCode === 13) {
+				stompClient.send("/app/hello", {}, JSON.stringify({ name: event.target.value }))
+				addMeChat(event.target.value)
+				event.target.value = '';
+			}
 		}
 
+		function addMeChat(txt) {
+			const meContents = document.createElement('div');
+			meContents.classList.add('me_chat_contents');
+			meContents.textContent = txt;
+
+			const childChat = document.createElement('li');
+			childChat.classList.add('chat_item', 'me');
+
+			childChat.appendChild(meContents);
+			parentChat.appendChild(childChat)
+		}
+		function otherChat(content) {
+			if (content) {
+				const youContents = document.createElement('div');
+				youContents.classList.add('me_chat_contents', 'you');
+				youContents.textContent = content;
+
+				const childChat = document.createElement('li');
+				childChat.classList.add('chat_item', 'you');
+
+				childChat.appendChild(youContents);
+				parentChat.appendChild(childChat)
+			}
+		}
 
 
 
