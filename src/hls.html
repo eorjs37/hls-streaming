@@ -20,14 +20,17 @@
 </head>
 
 <body>
-	<video id="video" controls autoplay muted playsinline></video>
-
+	<video id="video" crossorigin="anonymous" controls autoplay muted playsinline></video>
+	<div>
+		<button onclick="destory()">Destory</button>
+		<button onclick="init()">Init</button>
+	</div>
 	<script>
 		let video = null;
 		//https://dev.www.aplayz.co.kr/broadcast/1e5666ddc42fd171494b685389c45f12.m3u8
 		//https://www.aplayz.co.kr/broadcast/844f938d8b0304022d828628035c9f68.m3u8
 		//https://dev.www.aplayz.co.kr/broadcast/8358f72241f8d8e3081c088799493c97.m3u8
-		const videoSrc = 'https://stream.aplayz.co.kr/broadcast/e32af15e77a0d79cf849323e1cf7c7a2.m3u8'
+		const videoSrc = 'https://stream.aplayz.co.kr/broadcast/75e69c11da05321d4de74ea0eb8497b0.m3u8?accessToken=11'
 		let hls = null;
 		let initialPlay = false; //canplaythrough trigger 여러번 호출 방지
 		/* setVideo */
@@ -169,7 +172,9 @@
 
 				/* Hls.Events.ERROR */
 				hls.on(Hls.Events.ERROR, hlsErrorHandle)
-
+				hls.on(Hls.Events.MEDIA_ATTACHED, () => {
+					console.log("MEDIA_ATTACHED");
+				})
 				hls.startLoad();
 			}
 			else {
@@ -177,11 +182,20 @@
 			}
 		}
 
+
+		const destory = () => {
+			hls.destroy()
+		}
+
+		const init = () => {
+			initHls();
+		}
 		/* window load */
 		window.addEventListener('DOMContentLoaded', () => {
 			initVideo();
 			initHls();
 			videoAddEvent();
+
 		})
 
 	</script>
