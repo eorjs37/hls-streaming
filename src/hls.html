@@ -1,204 +1,228 @@
 <!DOCTYPE html>
 <html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+		<script src="https://vjs.zencdn.net/8.3.0/video.min.js"></script>
+		<title>Hls</title>
+		<style>
+			video {
+				max-width: 500px;
+				width: 100%;
+				max-height: 500px;
+				height: 100%;
+				object-fit: fill;
+			}
+		</style>
+	</head>
 
-<head>
-	<meta charset="UTF-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-	<script src="https://vjs.zencdn.net/8.3.0/video.min.js"></script>
-	<title>Hls</title>
-	<style>
-		video {
-			max-width: 500px;
-			width: 100%;
-			max-height: 500px;
-			height: 100%;
-			object-fit: fill;
-		}
-	</style>
-</head>
+	<body>
+		<video
+			id="video"
+			crossorigin="anonymous"
+			controls
+			autoplay
+			muted
+			playsinline
+			type="application/x-mpegURL"
+		></video>
+		<div>
+			<button onclick="destory()">Destory</button>
+			<button onclick="init()">Init</button>
+		</div>
+		<script>
+			let video = null;
+			//https://dev.www.aplayz.co.kr/broadcast/1e5666ddc42fd171494b685389c45f12.m3u8
+			//https://www.aplayz.co.kr/broadcast/844f938d8b0304022d828628035c9f68.m3u8
+			//https://dev.www.aplayz.co.kr/broadcast/8358f72241f8d8e3081c088799493c97.m3u8
+			const videoSrc =
+				"https://dev.stream.aplayz.co.kr/broadcast/7a4de10485ddb6bb0b6777cf34c7f5ea.m3u8";
+			let hls = null;
+			let initialPlay = false; //canplaythrough trigger 여러번 호출 방지
+			/* setVideo */
+			const initVideo = () => {
+				video = document.querySelector("#video");
+			};
 
-<body>
-	<video id="video" crossorigin="anonymous" controls autoplay muted playsinline></video>
-	<div>
-		<button onclick="destory()">Destory</button>
-		<button onclick="init()">Init</button>
-	</div>
-	<script>
-		let video = null;
-		//https://dev.www.aplayz.co.kr/broadcast/1e5666ddc42fd171494b685389c45f12.m3u8
-		//https://www.aplayz.co.kr/broadcast/844f938d8b0304022d828628035c9f68.m3u8
-		//https://dev.www.aplayz.co.kr/broadcast/8358f72241f8d8e3081c088799493c97.m3u8
-		const videoSrc = 'https://stream.aplayz.co.kr/broadcast/75e69c11da05321d4de74ea0eb8497b0.m3u8?accessToken=11'
-		let hls = null;
-		let initialPlay = false; //canplaythrough trigger 여러번 호출 방지
-		/* setVideo */
-		const initVideo = () => {
-			video = document.querySelector('#video')
-		}
+			/* promise retry video*/
+			const videoPromiseRetry = (retryCount = 3) => {
+				return new Promise((resolve, reject) => {
+					const retry = (attempt = 0) => {
+						const promise = video.play();
+						promise
+							.then(() => {
+								resolve("videoPromiseRetry success");
+							})
+							.catch((error) => {
+								console.error("videoPromiseRetry error : ", error);
+								if (attempt < retryCount) {
+									console.error(
+										`작업을 재시도 합니다. 남은 횟수 : ${retryCount - attempt}`
+									);
+									setTimeout(() => retry(attempt + 1), 1000);
+								} else {
+									const error = new Error("작업을 실패하였습니다.");
+									error.name = "FailRetry";
+									reject(error);
+								}
+							});
+					};
 
-		/* promise retry video*/
-		const videoPromiseRetry = (retryCount = 3) => {
-			return new Promise((resolve, reject) => {
-				const retry = (attempt = 0) => {
-					const promise = video.play();
-					promise
-						.then(() => {
-							resolve('videoPromiseRetry success')
-						})
-						.catch(error => {
-							console.error("videoPromiseRetry error : ", error);
-							if (attempt < retryCount) {
-								console.error(`작업을 재시도 합니다. 남은 횟수 : ${retryCount - attempt}`);
-								setTimeout(() => retry(attempt + 1), 1000)
+					retry(0);
+				});
+			};
+
+			/* hls error handle */
+			const hlsErrorHandle = (event, data) => {
+				const { type, fatal, details } = data;
+				console.log(" data : ", data);
+				if (fatal) {
+					console.log("data : ", data);
+					console.log("type : ", type);
+
+					switch (type) {
+						case Hls.ErrorTypes.MEDIA_ERROR:
+							console.log("fatal media error encountered, try to recover");
+
+							break;
+						case Hls.ErrorTypes.NETWORK_ERROR:
+							console.error("fatal network error encountered", data);
+							if (details === "fragLoadError") {
+								alert("인터넷 연결이 원할하지 않습니다.");
+								video.pause();
 							}
-							else {
-								const error = new Error('작업을 실패하였습니다.')
-								error.name = 'FailRetry';
-								reject(error)
-							}
+							break;
 
-						})
+						default:
+							break;
+					}
 				}
+			};
 
-				retry(0)
-
-			})
-		}
-
-		/* hls error handle */
-		const hlsErrorHandle = (event, data) => {
-
-			const { type, fatal, details } = data;
-			console.log(" data : ", data);
-			if (fatal) {
-
-				console.log("data : ", data);
-				console.log("type : ", type);
+			const onPlay = () => {
+				if (Hls.isSupported()) {
+					hls.startLoad();
+				}
+			};
+			/* eventHandle  */
+			const eventHandle = (evt) => {
+				const { type } = evt;
 
 				switch (type) {
-					case Hls.ErrorTypes.MEDIA_ERROR:
-						console.log('fatal media error encountered, try to recover');
-
-
+					case "canplaythrough":
+						console.log("canplaythrough");
 						break;
-					case Hls.ErrorTypes.NETWORK_ERROR:
-						console.error('fatal network error encountered', data);
-						if (details === 'fragLoadError') {
-							alert("인터넷 연결이 원할하지 않습니다.")
-							video.pause();
-						}
+					case "loadedmetadata":
+						console.log("loadedmetadata");
 						break;
 
 					default:
 						break;
 				}
-			}
-		}
+			};
 
-		const onPlay = () => {
-			hls.startLoad();
-		}
-		/* eventHandle  */
-		const eventHandle = (evt) => {
-			const { type } = evt;
-
-			switch (type) {
-				case 'canplaythrough':
-					console.log("canplaythrough");
-					break;
-				case 'loadedmetadata':
-					console.log('loadedmetadata');
-					break;
-
-				default:
-					break;
-			}
-		}
-
-		/* add video event */
-		const videoAddEvent = () => {
-			video.addEventListener("canplaythrough", eventHandle);
-			video.addEventListener("canplay", eventHandle);
-			video.addEventListener("loadedmetadata", eventHandle);
-			video.addEventListener("play", (evt) => {
-				console.log("play evt : ", evt);
-				hls.startLoad();
-			})
-		}
-
-		/* initHls */
-		const initHls = () => {
-			if (Hls.isSupported()) {
-				hls = new Hls({
-					autoStartLoad: false,
-					maxBufferSize: 320 * 1000 * 1000,
-					liveSyncDurationCount: 1,
-					highBufferWatchdogPeriod: 1,
-					nudgeMaxRetry: 99,
-					lowLatencyMode: false
-					// steeringManifestLoadPolicy: {
-					// 	default: {
-					// 		maxTimeToFirstByteMs: 10000,
-					// 		maxLoadTimeMs: 20000,
-					// 		timeoutRetry: {
-					// 			maxNumRetry: 1,
-					// 			retryDelayMs: 1000,
-					// 			maxRetryDelayMs: 5000,
-					// 		},
-					// 		errorRetry: {
-					// 			maxNumRetry: 1,
-					// 			retryDelayMs: 1000,
-					// 			maxRetryDelayMs: 8000,
-					// 		},
-					// 	}
-
-					// },
-					// fragLoadPolicy: {
-					// 	default: {
-					// 		maxTimeToFirstByteMs: 8000,
-					// 		maxLoadTimeMs: 120000,
-					// 		timeoutRetry: {
-					// 			maxNumRetry: 50,
-					// 			retryDelayMs: 1000,
-					// 			maxRetryDelayMs: 1000,
-					// 		}
-					// 	}
-					// }
+			/* add video event */
+			const videoAddEvent = () => {
+				video.addEventListener("canplaythrough", eventHandle);
+				video.addEventListener("canplay", eventHandle);
+				video.addEventListener("play", (evt) => {
+					console.log("play evt : ", evt);
+					if (Hls.isSupported()) {
+						hls.startLoad();
+					}
 				});
-				hls.loadSource(videoSrc);
-				hls.attachMedia(video);
+				video.addEventListener("error", (error) => {
+					console.log("video error : ", error);
+				});
+				video.addEventListener("loadedmetadata", (event) => {
+					const xhr = new XMLHttpRequest();
+					xhr.open("GET", videoSrc, true);
+					xhr.setRequestHeader("x-auth-token", "daegeon");
+					xhr.responseType = "blob";
+					xhr.onload = () => {
+						if (xhr.status === 200) {
+							const videoBlob = xhr.response;
+							const videoObjectURL = URL.createObjectURL(videoBlob);
+							video.src = videoObjectURL;
+						}
+					};
+					xhr.onerror = (error) => {
+						console.log("error xhr : ", error);
+					};
+					xhr.send();
+				});
+				// video.addEventListener("loadedmetadata", (event) => {
+				// 	const xhr = new XMLHttpRequest();
+				// 	xhr.open("GET", videoSrc, true);
+				// 	xhr.setRequestHeader("x-auth-token", "1");
+				// 	xhr.responseType = "blob";
+				// 	xhr.onload = (evt) => {
+				// 		console.log("evt : ", evt);
+				// 		console.log(evt.response);
+				// 	};
+				// 	xhr.send();
+				// });
 
-				/* Hls.Events.ERROR */
-				hls.on(Hls.Events.ERROR, hlsErrorHandle)
-				hls.on(Hls.Events.MEDIA_ATTACHED, () => {
-					console.log("MEDIA_ATTACHED");
-				})
-				hls.startLoad();
-			}
-			else {
-				video.src = videoSrc;
-			}
-		}
+				// video.addEventListener("loadedmetadata", function () {
+				// 	const xhr = new XMLHttpRequest();
+				// 	xhr.open("GET", video.src, true);
+				// 	xhr.setRequestHeader("x-auth-token", "daegeon");
+				// 	xhr.responseType = "blob";
+				// 	xhr.onload = function () {
+				// 		if (this.status === 200) {
+				// 			const videoBlob = this.response;
+				// 			const videoObjectURL = URL.createObjectURL(videoBlob);
+				// 			video.src = videoObjectURL;
+				// 		}
+				// 	};
+				// 	xhr.send();
+				// });
+			};
 
+			/* initHls */
+			const initHls = () => {
+				if (Hls.isSupported()) {
+					hls = new Hls({
+						autoStartLoad: false,
+						maxBufferSize: 320 * 1000 * 1000,
+						liveSyncDurationCount: 1,
+						highBufferWatchdogPeriod: 1,
+						nudgeMaxRetry: 99,
+						lowLatencyMode: false,
+					});
+					hls.loadSource(videoSrc);
+					hls.attachMedia(video);
 
-		const destory = () => {
-			hls.destroy()
-		}
+					/* Hls.Events.ERROR */
+					hls.on(Hls.Events.ERROR, hlsErrorHandle);
+					hls.on(Hls.Events.MEDIA_ATTACHED, () => {
+						console.log("MEDIA_ATTACHED");
+					});
+					hls.startLoad();
+				} else {
+					// const sourceEle = document.createElement("source");
+					// sourceEle.type = `application/x-mpegURL`;
+					// sourceEle.src = videoSrc;
+					// document.querySelector("video").appendChild(sourceEle);
+					video.src = videoSrc;
+				}
+			};
 
-		const init = () => {
-			initHls();
-		}
-		/* window load */
-		window.addEventListener('DOMContentLoaded', () => {
-			initVideo();
-			initHls();
-			videoAddEvent();
+			const destory = () => {
+				hls.destroy();
+			};
 
-		})
-
-	</script>
-</body>
-
+			const init = () => {
+				initHls();
+			};
+			/* window load */
+			window.addEventListener("DOMContentLoaded", () => {
+				initVideo();
+				initHls();
+				videoAddEvent();
+			});
+		</script>
+	</body>
 </html>
