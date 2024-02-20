@@ -153,32 +153,6 @@
 					};
 					xhr.send();
 				});
-				// video.addEventListener("loadedmetadata", (event) => {
-				// 	const xhr = new XMLHttpRequest();
-				// 	xhr.open("GET", videoSrc, true);
-				// 	xhr.setRequestHeader("x-auth-token", "1");
-				// 	xhr.responseType = "blob";
-				// 	xhr.onload = (evt) => {
-				// 		console.log("evt : ", evt);
-				// 		console.log(evt.response);
-				// 	};
-				// 	xhr.send();
-				// });
-
-				// video.addEventListener("loadedmetadata", function () {
-				// 	const xhr = new XMLHttpRequest();
-				// 	xhr.open("GET", video.src, true);
-				// 	xhr.setRequestHeader("x-auth-token", "daegeon");
-				// 	xhr.responseType = "blob";
-				// 	xhr.onload = function () {
-				// 		if (this.status === 200) {
-				// 			const videoBlob = this.response;
-				// 			const videoObjectURL = URL.createObjectURL(videoBlob);
-				// 			video.src = videoObjectURL;
-				// 		}
-				// 	};
-				// 	xhr.send();
-				// });
 			};
 
 			/* initHls */
