@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+		<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+		<style>
+			video {
+				max-width: 500px;
+				width: 100%;
+				max-height: 500px;
+				height: 100%;
+				object-fit: fill;
+			}
+		</style>
+	</head>
+	<body>
+		<video
+			id="video"
+			crossorigin="anonymous"
+			controls
+			autoplay
+			muted
+			playsinline
+			type="application/x-mpegURL"
+		></video>
+		<div>
+			<button onclick="destory()">Destory</button>
+			<button onclick="init()">Init</button>
+		</div>
+		<script>
+			const videoSrc =
+				"https://stream.aplayz.co.kr/broadcast/d75c03fdc2172bceecdafb912c56d147.m3u8";
+			let video = null;
+			let hls = null;
+			function destory() {}
+			function initVideo() {
+				video = document.querySelector("#video");
+			}
+			function initHls() {
+				if (Hls.isSupported()) {
+					hls = new Hls({
+						autoStartLoad: false,
+						maxBufferSize: 320 * 1000 * 1000,
+						liveSyncDurationCount: 1,
+						highBufferWatchdogPeriod: 1,
+						nudgeMaxRetry: 99,
+						lowLatencyMode: false,
+						xhrSetup: (xhr) => {
+							xhr.setRequestHeader("x-auth-token", "token");
+						},
+					});
+					hls.loadSource(videoSrc);
+					hls.attachMedia(video);
+					hls.startLoad();
+				} else {
+					video.src = `${videoSrc}?x-auth-token=token`;
+				}
+			}
+
+			window.addEventListener("DOMContentLoaded", () => {
+				initVideo();
+				initHls();
+			});
+		</script>
+	</body>
+</html>

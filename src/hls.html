@@ -38,7 +38,7 @@
 			//https://www.aplayz.co.kr/broadcast/844f938d8b0304022d828628035c9f68.m3u8
 			//https://dev.www.aplayz.co.kr/broadcast/8358f72241f8d8e3081c088799493c97.m3u8
 			const videoSrc =
-				"https://dev.stream.aplayz.co.kr/broadcast/7a4de10485ddb6bb0b6777cf34c7f5ea.m3u8";
+				"https://dev.stream.aplayz.co.kr/broadcast/008da5929d7246f9a37aa0a2019c2d10.m3u8";
 			let hls = null;
 			let initialPlay = false; //canplaythrough trigger 여러번 호출 방지
 			/* setVideo */
@@ -134,24 +134,32 @@
 					}
 				});
 				video.addEventListener("error", (error) => {
-					console.log("video error : ", error);
+					console.log("video error : ", video.error.code);
 				});
 				video.addEventListener("loadedmetadata", (event) => {
-					const xhr = new XMLHttpRequest();
-					xhr.open("GET", videoSrc, true);
-					xhr.setRequestHeader("x-auth-token", "daegeon");
-					xhr.responseType = "blob";
-					xhr.onload = () => {
-						if (xhr.status === 200) {
-							const videoBlob = xhr.response;
-							const videoObjectURL = URL.createObjectURL(videoBlob);
-							video.src = videoObjectURL;
-						}
-					};
-					xhr.onerror = (error) => {
-						console.log("error xhr : ", error);
-					};
-					xhr.send();
+					console.log("loadedmetadata");
+					if (!Hls.isSupported()) {
+						const xhr = new XMLHttpRequest();
+						xhr.open("GET", videoSrc, true);
+						xhr.setRequestHeader("x-auth-token", "daegeon");
+						xhr.responseType = "blob";
+						xhr.onload = () => {
+							if (xhr.status === 200) {
+								const videoBlob = xhr.response;
+								const blob = new Blob([videoBlob], {
+									type: "application/x-mpegURL",
+								});
+								const videoObjectURL = URL.createObjectURL(videoBlob);
+								console.log(videoObjectURL);
+								video.src = videoObjectURL;
+								video.type = "application/x-mpegURL";
+							}
+						};
+						xhr.onerror = (error) => {
+							console.log("error xhr : ", error);
+						};
+						xhr.send();
+					}
 				});
 			};
 
