@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="../styles/reset.css" />
+		<link rel="stylesheet" href="../styles/audioAnalyser.css" />
+		<title>audioAnalyser</title>
+	</head>
+	<body>
+		<canvas id="canvas" class="audio_analyser"></canvas>
+		<button onclick="stopAnimation()">중지</button>
+		<script>
+			obj = {};
+			let timeOffset = 100;
+			let refId = -1;
+			let now = parseInt(performance.now()) / timeOffset;
+			function init() {
+				obj.canvas = document.querySelector("#canvas");
+				obj.ctx = obj.canvas.getContext("2d");
+				obj.width = window.innerWidth * 0.9;
+				obj.height = window.innerHeight * 0.9;
+				obj.canvas.width = obj.width * window.devicePixelRatio;
+				obj.canvas.height = obj.height * window.devicePixelRatio;
+				obj.canvas.style.width = obj.width + "px";
+				obj.canvas.style.height = obj.height + "px";
+				obj.canvas.style.border = "1px solid black";
+				obj.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+				document.body.appendChild(obj.canvas);
+			}
+
+			function loop() {
+				obj.ctx.clearRect(0, 0, obj.canvas.width, obj.canvas.height);
+				obj.analyser.getByteTimeDomainData(obj.frequencyArray);
+
+				let max = 0;
+				if (parseInt(performance.now() / timeOffset) > now) {
+					now = parseInt(performance.now() / timeOffset);
+					for (var i = 0; i < obj.frequencyArray.length; i++) {
+						if (obj.frequencyArray[i] > max) {
+							max = obj.frequencyArray[i];
+						}
+					}
+
+					var freq = Math.floor(Math.random() * 128) + 16;
+					//var freq = Math.floor(max / 8);
+					obj.bars.push({
+						x: obj.width,
+						y: obj.height / 2 - freq / 2,
+						height: freq,
+						width: 5,
+					});
+				}
+
+				draw();
+				refId = requestAnimationFrame(loop);
+			}
+			obj.bars = [];
+
+			function draw() {
+				for (i = 0; i < obj.bars.length; i++) {
+					const bar = obj.bars[i];
+					obj.ctx.fillStyle = `rgba(255, 45, 85, 1)`;
+					obj.ctx.fillRect(bar.x, bar.y, bar.width, bar.height);
+					bar.x = bar.x - 2;
+
+					if (bar.x < 1) {
+						obj.bars.splice(i, 1);
+					}
+				}
+			}
+
+			function soundAllowed(stream) {
+				var AudioContext = window.AudioContext || window.webkitAudioContext;
+				var audioContent = new AudioContext();
+				var streamSource = audioContent.createMediaStreamSource(stream);
+				obj.analyser = audioContent.createAnalyser();
+				streamSource.connect(obj.analyser);
+				obj.analyser.fftSize = 32;
+				obj.frequencyArray = new Uint8Array(obj.analyser.frequencyBinCount);
+
+				init();
+				loop();
+			}
+			function soundNotAllowed() {}
+
+			function stopAnimation() {
+				console.log("!");
+
+				cancelAnimationFrame(refId);
+			}
+
+			navigator.mediaDevices
+				.getUserMedia({ audio: true })
+				.then(soundAllowed)
+				.catch(soundNotAllowed);
+		</script>
+	</body>
+</html>

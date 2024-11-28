@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Canvas</title>
+		<link rel="stylesheet" href="../styles/reset.css" />
+		<style>
+			#canvas {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 1871px;
+				height: 300px;
+				border: 1px solid black;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="canvas"></canvas>
+		<script>
+			obj = {};
+			let x = 2;
+			let y = 0;
+			let refId = -1;
+			function init() {
+				const canvas = document.querySelector("canvas");
+				obj.canvas = canvas;
+				obj.ctx = obj.canvas.getContext("2d");
+				obj.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+				obj.width = window.innerWidth * 0.9;
+				obj.height = window.innerHeight * 0.9;
+				// obj.canvas.width = obj.width * window.devicePixelRatio;
+				// obj.canvas.height = obj.height * window.devicePixelRatio;
+				obj.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+				//draw();
+				loop();
+			}
+
+			obj.bars = [];
+			function loop() {
+				obj.ctx.clearRect(0, 0, obj.canvas.width, obj.canvas.height);
+
+				obj.bars.push({
+					x,
+					y,
+				});
+				x = x + 10;
+				draw();
+				refId = requestAnimationFrame(loop);
+
+				setTimeout(() => {
+					cancelAnimationFrame(refId);
+				}, 1000 * 60);
+			}
+
+			function draw() {
+				for (let i = 0; i < obj.bars.length; i++) {
+					const bar = obj.bars[i];
+					obj.ctx.fillStyle = `rgba(255, 45, 85, 1)`;
+					obj.ctx.fillRect(bar.x, bar.y, 10, 25);
+				}
+			}
+
+			init();
+		</script>
+	</body>
+</html>
