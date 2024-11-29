@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+		<link rel="stylesheet" href="../styles/reset.css" />
+	</head>
+	<body>
+		<button onclick="stopRecord()">중지</button>
+		<button onclick="uploadFile()">업로드</button>
+		<a>DownLoad</a>
+		<script>
+			let audioStream = null;
+			let audioRecorder = null;
+			let audioChuncks = [];
+			let mp3Blob = null;
+			navigator.mediaDevices.getUserMedia({ audio: true }).then(allowedStream);
+
+			function allowedStream(stream) {
+				audioStream = stream;
+				audioRecorder = new MediaRecorder(stream);
+
+				audioRecorder.addEventListener("dataavailable", onDataavailable);
+
+				audioRecorder.start();
+			}
+			function onDataavailable(event) {
+				audioChuncks.push(event.data);
+			}
+
+			function stopRecord() {
+				mp3Blob = new Blob(audioChuncks, { type: "audio/mp3" });
+				audioStream.getTracks().forEach((track) => track.stop());
+
+				audioChuncks = [];
+			}
+
+			function uploadFile() {
+				const url = `http://localhost:3000/api/file/fileupload`;
+
+				const formData = new FormData();
+				formData.append("fileToUpload", mp3Blob);
+
+				fetch(url, {
+					method: "POST",
+					body: formData,
+				});
+			}
+		</script>
+	</body>
+</html>
